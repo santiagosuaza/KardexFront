@@ -46,7 +46,7 @@ public class ProductoService implements ProductoDao {
     @Override
     public Producto bajarStock(Long id) {
         Producto producto = productoRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid User Id" + id));
-        if (producto != null) {
+        if (producto != null && producto.getCantidad() >0) {
             producto.setCantidad(producto.getCantidad() - 1);
             productoRepository.save(producto);
             return producto;
