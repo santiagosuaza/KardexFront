@@ -12,15 +12,16 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-class ProductoServiceTest {
+class ProductoServiceImplTest {
 
     ProductoRepository productoRepository = mock(ProductoRepository.class);
+    DetalleProductoServiceImpl detalleProductoService = mock(DetalleProductoServiceImpl.class);
 
 
 
     @Test
     void crearExitoso() {
-        ProductoService productoService = new ProductoService(productoRepository);
+        IProductoService productoService = new ProductoServiceImpl(productoRepository,detalleProductoService);
         Producto producto = new Producto("Santiago",3,"",0D,"");
         when(productoRepository.save(Mockito.any(Producto.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
@@ -35,7 +36,7 @@ class ProductoServiceTest {
 
     @Test
     void consultarTodos() {
-        ProductoService productoService = new ProductoService(productoRepository);
+        IProductoService productoService = new ProductoServiceImpl(productoRepository,detalleProductoService);
         Producto producto = new Producto("Santiago",3,"",0D,"");
         List<Producto> productos = Arrays.asList(producto);
        when(productoRepository.findAll()).thenReturn(productos);
@@ -50,13 +51,13 @@ class ProductoServiceTest {
 
     @Test
     void bajarStock() {
-       ProductoService productoService = new ProductoService(productoRepository);
+       IProductoService productoService = new ProductoServiceImpl(productoRepository,detalleProductoService);
         Producto productoBD = new Producto( "Santiago",3,"",0D,"");
         Integer cantidadBD =  productoBD.getCantidad();
         when(productoRepository.findById((any()))).thenReturn(Optional.of(productoBD));
-        when(productoService.bajarStock((any()))).thenReturn(productoBD);
-        assertEquals(productoBD.getCantidad(),
-                (Integer)(cantidadBD-1));
+        Producto resultado = productoService.bajarStock(1L);
+
+        assertEquals((Integer) (cantidadBD - 1), resultado.getCantidad());
 
 
     }
