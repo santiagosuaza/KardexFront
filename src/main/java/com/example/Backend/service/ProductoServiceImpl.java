@@ -6,11 +6,16 @@ import com.example.Backend.model.TipoMovimiento;
 import com.example.Backend.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
-public class ProductoServiceImpl implements IProductoService {
 
+public class ProductoServiceImpl implements IProductoService {
+    Date date=new Date();
+    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private ProductoRepository productoRepository;
     private IDetalleProductoService detalleProductoService;
 
@@ -24,8 +29,10 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Producto crear(Producto producto) {
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         productoRepository.save(producto);
-        detalleProductoService.crear(new DetalleProducto("Producto Creado", producto.getCantidad(), TipoMovimiento.SUBIO));
+        detalleProductoService.crear(new DetalleProducto("Producto Creado", producto.getCantidad(), TipoMovimiento.SUBIO,dateFormat.format(date))
+        );
         return producto;
     }
 
@@ -38,7 +45,6 @@ public class ProductoServiceImpl implements IProductoService {
     @Override
     public List<Producto> consultarTodos() {
         return productoRepository.findAll();
-
     }
 
     @Override
@@ -46,7 +52,7 @@ public class ProductoServiceImpl implements IProductoService {
         return productoRepository.findById(id).map(
                 producto -> {
                     productoRepository.delete(producto);
-                    detalleProductoService.crear(new DetalleProducto("Producto eliminado", 0, TipoMovimiento.BAJO));
+                    detalleProductoService.crear(new DetalleProducto("Producto eliminado", 0, TipoMovimiento.BAJO,null));
                     return true;
                 }
         ).orElse(false);
@@ -56,8 +62,9 @@ public class ProductoServiceImpl implements IProductoService {
     public Producto bajarStock(Long id) {
         Producto producto = productoRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid User Id" + id));
         if ( producto.getCantidad() > 0) {
-            detalleProductoService.crear(new DetalleProducto("Bajo del stock", producto.getCantidad(), TipoMovimiento.BAJO));
-            producto.setCantidad(producto.getCantidad() - 1);
+            producto.setCantidad(producto.getCantidad()-1 );
+            detalleProductoService.crear(new DetalleProducto("Bajo del stock", producto.getCantidad(), TipoMovimiento.BAJO,dateFormat.format(date)
+            ));
             productoRepository.save(producto);
             return producto;
         } else {
